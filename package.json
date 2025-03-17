@@ -3,7 +3,7 @@
   "displayName": "Flutter-provider-generator",
   "description": "A VS Code extension to generate provider template files",
   "publisher": "xishubwang",
-  "version": "0.0.2",
+  "version": "0.0.4",
   "engines": {
     "vscode": "^1.97.0"
   },
@@ -16,7 +16,15 @@
     "commands": [
       {
         "command": "flutter-provider-generator.buildProviderTemplate",
-        "title": "Build Provider Template"
+        "title": "Provider: StatelessWidget"
+      },
+      {
+        "command": "flutter-provider-generator.buildProviderFulTemplate",
+        "title": "Provider: StatefulWidget"
+      },
+      {
+        "command": "flutter-provider-generator.buildCommonDir",
+        "title": "Creat Common Dir"
       }
     ],
     "menus": {
@@ -24,7 +32,17 @@
         {
           "command": "flutter-provider-generator.buildProviderTemplate",
           "when": "explorerResourceIsFolder && dart-code:anyProjectLoaded",
-          "group": "navigation"
+          "group": "blocGroup@2"
+        },
+        {
+          "command": "flutter-provider-generator.buildProviderFulTemplate",
+          "when": "explorerResourceIsFolder && dart-code:anyProjectLoaded",
+          "group": "blocGroup@2"
+        },
+        {
+          "command": "flutter-provider-generator.buildCommonDir",
+          "when": "explorerResourceIsFolder && dart-code:anyProjectLoaded",
+          "group": "blocGroup@2"
         }
       ]
     }
