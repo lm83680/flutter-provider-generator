@@ -1,4 +1,5 @@
 import * as fs from "fs";
+import * as vscode from 'vscode';
 import * as cp from "child_process";
 
 export function generateTemplate(featureName: string, folderPath: string, isFullWidget: boolean) {
@@ -46,7 +47,7 @@ function capitalizeFirstLetter(input: string): string {
 
 
 export async function generateCommonDir(folderPath: string) {
-    fs.writeFile(`${folderPath}/index.txt`, "flutter pub add dio provider get_it gap flutter_animate logger intl flutter_svg shared_preferences\ndart pub add dev:json_serializable change_app_package_name", (_) => { });
+    fs.writeFile(`${folderPath}/index.txt`, "flutter pub add dio provider get_it gap flutter_animate logger intl flutter_svg shared_preferences go_router\ndart pub add dev:json_serializable change_app_package_name", (_) => { });
     fs.mkdir(`${folderPath}/screens`, (_) => { });
     fs.mkdir(`${folderPath}/common`, { recursive: true }, (err) => {
         if (err) {
@@ -60,9 +61,59 @@ export async function generateCommonDir(folderPath: string) {
             fs.writeFile(`${folderPath}/common/apis/index.dart`, "library;\n // export './user.dart';", (_) => { });
         });
         fs.mkdir(`${folderPath}/common/components`, (_) => { });
-        fs.mkdir(`${folderPath}/common/routers`, { recursive: true }, (_) => {
-            fs.writeFile(`${folderPath}/common/routers/index.dart`, "library;\n // export './name.dart';\n // export './pages.dart';", (_) => { });
-        });
+        fs.mkdir(`${folderPath}/common/routers`, (_) => { });
     });
+    return true;
+}
+
+export async function generateGoRouter() {
+    const files = await vscode.workspace.findFiles(`lib/screens/**/screen.dart`, '**/build/**'); // 查找所有 screen.dart
+    let routes: string[] = [];
+
+    for (const file of files) {
+        const document = await vscode.workspace.openTextDocument(file);
+        const text = document.getText();
+
+        // 匹配 class 类名
+        const classMatch = text.match(/class\s+(\w+Screen)\s+extends\s+(\w+Widget)/);
+        // 匹配 routeName 静态变量
+        const routeMatch = text.match(/static\s+const\s+routeName\s*=\s*['"]([^'"]+)['"]/);
+
+        if (classMatch && routeMatch) {
+            const className = classMatch[1]; // 提取类名
+            const routePath = routeMatch[1]; // 提取路径
+
+            routes.push(`GoRoute(\n  path: '${routePath}',\n  builder: (context, state) => const ${className}(),\n)`);
+        }
+    }
+
+    if (routes.length === 0) {
+        vscode.window.showInformationMessage("未找到任何 screen.dart 文件");
+        return;
+    }
+
+    const workspaceFolder = vscode.workspace.workspaceFolders![0].uri.fsPath;
+
+    // 2. 生成 index.dart 内容
+    const exportStatements = files.map(file => {
+        const relativePath = vscode.workspace.asRelativePath(file);
+        return `export '${relativePath.replace(/^lib\//, '../../')}';`;
+    }).join('\n');
+
+    // 写入 index.dart
+    fs.writeFile(`${workspaceFolder}/lib/screens/index.dart`, Buffer.from(exportStatements, 'utf8'), (_) => { });
+
+    // 3. 生成 go_router.dart 内容
+    const goRouterContent = `import 'package:go_router/go_router.dart';\n\nimport '../../screens/index.dart';\n\nfinal GoRouter router = GoRouter(\n  routes: [\n${files
+        .map(file => {
+            const featureName = file.path.split('/').slice(-2, -1)[0]; // 取 screen.dart 上一级目录名
+            const className = capitalizeFirstLetter(featureName) + "Screen";
+            return `    GoRoute(path: "/${featureName}", builder: (context, state) => const ${className}()),`;
+        })
+        .join('\n')}\n  ],\n);\n`;
+
+    // 写入 go_router.dart
+    fs.writeFile(`${workspaceFolder}/lib/common/routers/go_router.dart`, Buffer.from(goRouterContent, 'utf8'), (_) => { });
+
     return true;
 }

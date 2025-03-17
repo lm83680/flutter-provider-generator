@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { generateCommonDir, generateTemplate } from './generator';
+import { generateCommonDir, generateGoRouter, generateTemplate } from './generator';
 
 export function activate(context: vscode.ExtensionContext) {
 
@@ -17,7 +17,7 @@ export function activate(context: vscode.ExtensionContext) {
         });
 
         if (featureName && featureName.length > 0) {
-            const success = await generateTemplate(featureName, uri.fsPath,false);
+            const success = await generateTemplate(featureName, uri.fsPath, false);
             if (!success) {
                 vscode.window.showErrorMessage(`Failed to create ${featureName} feature!`);
                 return;
@@ -62,10 +62,30 @@ export function activate(context: vscode.ExtensionContext) {
 
     });
 
+    let disposable4 = vscode.commands.registerCommand('flutter-provider-generator.generateGoRouter', async () => {
+        const success = await generateGoRouter();
+        if (!success) {
+            vscode.window.showErrorMessage(`Failed to create go_router`);
+            return;
+        }
+        vscode.window.showInformationMessage('go_router.dart 已生成 🎉');
+
+    });
+
     context.subscriptions.push(disposable);
     context.subscriptions.push(disposable2);
     context.subscriptions.push(disposable3);
+    context.subscriptions.push(disposable4);
 }
 
 export function deactivate() {
+}
+
+
+function capitalizeFirstLetter(input: string): string {
+    return input
+        .toLowerCase()
+        .replace(/(?:^|_)(\w)/g, (match, p1, index) =>
+            index === 0 ? p1.toUpperCase() : p1.toLowerCase()
+        );
 }

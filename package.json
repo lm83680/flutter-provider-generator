@@ -3,7 +3,7 @@
   "displayName": "Flutter-provider-generator",
   "description": "A VS Code extension to generate provider template files",
   "publisher": "xishubwang",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "engines": {
     "vscode": "^1.97.0"
   },
@@ -25,6 +25,10 @@
       {
         "command": "flutter-provider-generator.buildCommonDir",
         "title": "Creat Common Dir"
+      },
+      {
+        "command": "flutter-provider-generator.generateGoRouter",
+        "title": "GoRouter: generate"
       }
     ],
     "menus": {
@@ -32,17 +36,22 @@
         {
           "command": "flutter-provider-generator.buildProviderTemplate",
           "when": "explorerResourceIsFolder && dart-code:anyProjectLoaded",
-          "group": "blocGroup@2"
+          "group": "providerGenerator@2"
         },
         {
           "command": "flutter-provider-generator.buildProviderFulTemplate",
           "when": "explorerResourceIsFolder && dart-code:anyProjectLoaded",
-          "group": "blocGroup@2"
+          "group": "providerGenerator@2"
         },
         {
           "command": "flutter-provider-generator.buildCommonDir",
           "when": "explorerResourceIsFolder && dart-code:anyProjectLoaded",
-          "group": "blocGroup@2"
+          "group": "providerGenerator@2"
+        },
+        {
+          "command": "flutter-provider-generator.generateGoRouter",
+          "when": "explorerResourceIsFolder && dart-code:anyProjectLoaded",
+          "group": "providerGenerator@2"
         }
       ]
     }
