@@ -1,6 +1,7 @@
 import * as fs from "fs";
 import * as vscode from 'vscode';
 import * as cp from "child_process";
+import * as path from 'path';
 
 export function generateTemplate(featureName: string, folderPath: string, isFullWidget: boolean) {
     fs.mkdir(`${folderPath}/${featureName}`, { recursive: true }, (err) => {
@@ -97,14 +98,14 @@ export async function generateGoRouter() {
     // 2. 生成 index.dart 内容
     const exportStatements = files.map(file => {
         const relativePath = vscode.workspace.asRelativePath(file);
-        return `export '${relativePath.replace(/^lib\//, '../../')}';`;
+        return `export '${relativePath.replace(/^lib\/screens\//, '')}';`;
     }).join('\n');
 
     // 写入 index.dart
-    fs.writeFile(`${workspaceFolder}/lib/screens/index.dart`, Buffer.from(exportStatements, 'utf8'), (_) => { });
+    fs.writeFile(`${workspaceFolder}/lib/screens/index.dart`, exportStatements, (_) => { });
 
     // 3. 生成 go_router.dart 内容
-    const goRouterContent = `import 'package:go_router/go_router.dart';\n\nimport '../../screens/index.dart';\n\nfinal GoRouter router = GoRouter(\n  routes: [\n${files
+    const goRouterContent = `import 'package:go_router/go_router.dart';\n\nimport 'package:${path.basename(workspaceFolder)}/screens/index.dart';\n\nfinal GoRouter router = GoRouter(\n  routes: [\n${files
         .map(file => {
             const featureName = file.path.split('/').slice(-2, -1)[0]; // 取 screen.dart 上一级目录名
             const className = capitalizeFirstLetter(featureName) + "Screen";
@@ -113,7 +114,7 @@ export async function generateGoRouter() {
         .join('\n')}\n  ],\n);\n`;
 
     // 写入 go_router.dart
-    fs.writeFile(`${workspaceFolder}/lib/common/routers/go_router.dart`, Buffer.from(goRouterContent, 'utf8'), (_) => { });
+    fs.writeFile(`${workspaceFolder}/lib/common/routers/go_router.dart`,goRouterContent, (_) => { });
 
     return true;
 }

@@ -80,12 +80,3 @@ export function activate(context: vscode.ExtensionContext) {
 
 export function deactivate() {
 }
-
-
-function capitalizeFirstLetter(input: string): string {
-    return input
-        .toLowerCase()
-        .replace(/(?:^|_)(\w)/g, (match, p1, index) =>
-            index === 0 ? p1.toUpperCase() : p1.toLowerCase()
-        );
-}
